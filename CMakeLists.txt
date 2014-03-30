@@ -8,7 +8,9 @@ set(gltest_VERSION_PATCH "0")
 set(gltest_VERSION_EXTRA "")
 set(gltest_VERSION "${GLFW_VERSION_MAJOR}.${GLFW_VERSION_MINOR}")
 set(gltest_VERSION_FULL "${GLFW_VERSION}.${GLFW_VERSION_PATCH}${GLFW_VERSION_EXTRA}")
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_FLAGS "-std=c++11")
 
 add_executable(gltest src/main.cpp)
 

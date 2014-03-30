@@ -2,43 +2,61 @@
 
 #include <cstdlib>
 #include <cstdio>
-static void error_callback(int error, const char* description)
+
+class gltestapp
+{
+    public:
+        int run(int, char*[]);
+    protected:
+        static void error_callback(int error, const char* description);
+        static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+        void show_framerate();
+        GLFWwindow *Mainwindow = nullptr;
+        long long framecounter = 0l;
+        float startTime = 0.f;
+
+};
+void gltestapp::error_callback(int error, const char* description)
 {
     fputs(description, stderr);
 }
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void gltestapp::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
-int main(int argc, char *argv[])
+void gltestapp::show_framerate()
 {
-    GLFWwindow* window;
+    printf("\r|%f|%f|%lld|", framecounter / (glfwGetTime() - startTime), glfwGetTime()-startTime, framecounter);
+}
 
+int gltestapp::run(int argc, char *argv[])
+{
     glfwSetErrorCallback(error_callback);
 
     if(!glfwInit())
         exit(EXIT_FAILURE);
+    startTime = glfwGetTime();
 
-    window = glfwCreateWindow(640, 480, "simple ex", NULL, NULL);
-    if(!window)
+    Mainwindow = glfwCreateWindow(640, 480, "simple ex", NULL, NULL);
+    if(!Mainwindow)
     {
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
 
-    glfwMakeContextCurrent(window);
-    glfwSetKeyCallback(window, key_callback);
+    glfwMakeContextCurrent(Mainwindow);
+    glfwSetKeyCallback(Mainwindow, key_callback);
 
-    while(!glfwWindowShouldClose(window))
+    while(!glfwWindowShouldClose(Mainwindow))
     {
         float ratio;
         int width;
         int height;
 
-        glfwGetFramebufferSize(window, &width, &height);
+        glfwGetFramebufferSize(Mainwindow, &width, &height);
         ratio = width / float(height);
 
         glViewport(0, 0, width, height);
@@ -70,13 +88,14 @@ int main(int argc, char *argv[])
         glVertex3f(-0.8f, -0.9f, 0.f);
         glEnd();
 
+        // block in the middle
         glBegin(GL_TRIANGLES);
         glColor3f(1.f, 1.f, 1.f);
         glVertex3f(-0.4f, -0.4f, 0.f);
-        glVertex4f(0.0f, -0.0f, 0.f, 0.f);
+        glVertex3f(0.0f, -0.0f, 0.f);
         glVertex3f(-0.4f, -0.0f, 0.f);
         glVertex3f(-0.4f, -0.4f, 0.f);
-        glVertex4f(0.0f, -0.0f, 0.f, 1.f);
+        glVertex3f(0.0f, -0.0f, 0.f);
         glVertex3f(-0.0f, -0.4f, 0.f);
 
         glVertex3f(0.4f, 0.4f, 0.f);
@@ -103,10 +122,19 @@ int main(int argc, char *argv[])
         glVertex3f(0.0f, -0.4f, 0.f);
         glEnd();
 
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(Mainwindow);
         glfwPollEvents();
+        ++framecounter;
+        show_framerate();
     }
-    glfwDestroyWindow(window);
+
+    glfwDestroyWindow(Mainwindow);
     glfwTerminate();
     return EXIT_SUCCESS;
+}
+
+int main(int argc, char *argv[])
+{
+    gltestapp app;
+    return app.run(argc, argv);
 }
