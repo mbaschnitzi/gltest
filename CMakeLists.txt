@@ -14,6 +14,10 @@ set(CMAKE_CXX_FLAGS "-std=c++11")
 
 add_executable(gltest src/main.cpp)
 
+### glew
+#add_subdirectory(libs/glew)
+include_directories(libs/glew/include)
+### glfw
 add_subdirectory(libs/glfw)
 include_directories(libs/glfw/include)
 target_link_libraries(gltest glfw ${GLFW_LIBRARIES})
