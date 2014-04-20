@@ -17,9 +17,16 @@ add_executable(gltest src/main.cpp)
 ### glew
 #add_subdirectory(libs/glew)
 include_directories(libs/glew/include)
+add_library(glew STATIC IMPORTED)
+set_target_properties(glew PROPERTIES IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/libs/glew/lib/libGLEW.a)
 ### glfw
 add_subdirectory(libs/glfw)
 include_directories(libs/glfw/include)
-target_link_libraries(gltest glfw ${GLFW_LIBRARIES})
+# glm
+include_directories(libs/glm)
+
+
+
+target_link_libraries(gltest glfw glew ${GLFW_LIBRARIES})
 
 ### ### sdfsd

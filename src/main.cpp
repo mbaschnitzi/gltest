@@ -1,28 +1,54 @@
+/*!
+ * Main file of my gltest opengl program.
+ * \author Micha Ahrweiler
+ * \date 2014-04-09
+ */
+
+#include <GL/glew.h>        // GLEW
+#include <GLFW/glfw3.h>     // GLFW
+#include <glm/glm.hpp>      // GLM
+
+#include "gltestapp.h"
+// stl
 #include <cstdlib>
 #include <cstdio>
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-class gltestapp
+gltestapp::gltestapp() {}
+bool gltestapp::Init(int argc, char *argv[])
 {
-    public:
-        int run(int, char*[]);
-    protected:
-        static void error_callback(int error, const char* description);
-        static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-        void show_framerate();
-        GLFWwindow *Mainwindow = nullptr;
-        long long framecounter = 0l;
-        float startTime = 0.f;
+    glfwSetErrorCallback(ErrorCallback);
+    if(!glfwInit())
+    {
+        fprintf(stderr, "failed to initialize glfw\n");
+        return false;
+    }
+    startTime = glfwGetTime();
+    if(!OpenWindow())
+        return false;
+    return true;
+    
+}
+bool gltestapp::OpenWindow()
+{
+    glfwWindowHint(GLFW_SAMPLES, 4); // 4x aa
+    //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-};
-void gltestapp::error_callback(int error, const char* description)
+    Mainwindow = glfwCreateWindow(640, 480, "simple ex", NULL, NULL);
+    if(!Mainwindow)
+    {
+        glfwTerminate();
+        return false;
+    }
+    return true;
+}
+void gltestapp::ErrorCallback(int error, const char* description)
 {
     fputs(description, stderr);
 }
 
-void gltestapp::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void gltestapp::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
@@ -33,23 +59,27 @@ void gltestapp::show_framerate()
     printf("\r|%f|%f|%lld|", framecounter / (glfwGetTime() - startTime), glfwGetTime()-startTime, framecounter);
 }
 
-int gltestapp::run(int argc, char *argv[])
+int gltestapp::Run()
 {
-    glfwSetErrorCallback(error_callback);
+    GLuint VertexArrayID;
+    //glGenVertexArrays(1, &VertexArrayID);
+    //glBindVertexArray(VertexArrayID);
 
-    if(!glfwInit())
-        exit(EXIT_FAILURE);
-    startTime = glfwGetTime();
-
-    Mainwindow = glfwCreateWindow(640, 480, "simple ex", NULL, NULL);
-    if(!Mainwindow)
-    {
-        glfwTerminate();
-        exit(EXIT_FAILURE);
-    }
+    static const GLfloat g_vertex_buffer_data[] = {
+        -1.0f, -1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+    };
+    
 
     glfwMakeContextCurrent(Mainwindow);
-    glfwSetKeyCallback(Mainwindow, key_callback);
+    glewExperimental=GL_TRUE;
+    if(glewInit() != GLEW_OK)
+    {
+        fprintf(stderr, "glew init failed\n");
+        return EXIT_FAILURE;
+    }
+    glfwSetKeyCallback(Mainwindow, KeyCallback);
 
     while(!glfwWindowShouldClose(Mainwindow))
     {
@@ -137,5 +167,7 @@ int gltestapp::run(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
     gltestapp app;
-    return app.run(argc, argv);
+    if(!app.Init(argc, argv))
+        return EXIT_FAILURE;
+    return app.Run();
 }
